@@ -2,17 +2,25 @@ import { useState } from "react";
 import AddForm from "./AddForm";
 import ExpenseTable from "./ExpenseTable";
 import Header from "./Header";
-import { myExpense } from "../myExpense";
 
 const Home = () => {
-    const [totalAmount, setTotalAmount] = useState(0)
-    const [budget, setBudget] = useState(10000)
-    const[expense,setExpense] =useState(myExpense);
+    const [budget, setBudget] = useState(10000);
+    localStorage.setItem('budget', budget);
+    const [totalAmount, setTotalAmount] = useState(0);
+
+    
+    const [expense, setExpense] = useState(() => {
+        return JSON.parse(localStorage.getItem('expense')) ? JSON.parse(localStorage.getItem('expense')) : [];
+    });
+
+  
+   
+
     return (
-        <div className="absolute w-screen h-screen bg-white">
+        <div className="absolute w-[100vw] h-[full] bg-green-300">
             <Header budget={budget} setBudget={setBudget} totalAmount={totalAmount} ></Header>
-            <AddForm setExpense={setExpense}></AddForm>
-            <ExpenseTable expense={expense} totalAmount={totalAmount} setTotalAmount={setTotalAmount}></ExpenseTable>
+            <AddForm setExpense={setExpense} expense={expense}></AddForm>
+            <ExpenseTable expense={expense} setExpense={setExpense} totalAmount={totalAmount} setTotalAmount={setTotalAmount}></ExpenseTable>
         </div>
     );
 }

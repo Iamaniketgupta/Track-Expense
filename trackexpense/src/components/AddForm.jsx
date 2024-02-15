@@ -1,61 +1,96 @@
 import { useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
+import InputControl from './InputControl';
 
-const AddForm = (prop) => {
+const AddForm = ({setExpense,expense}) => {
 
-    // const[title,setTitle] = useState('');
-    // const[category,setCategory] = useState('');
-    // const[amount,setAmount] = useState(0);
     const [formData, setFormData] = useState({ title: '', category: '', amount: '' });
+    const [trimmedFormData, setTrimmedFormData] = useState({  title: '', category: '', amount: '' });
+    const [error, setError] = useState({});
 
-    function submitHandler (e){
-        e.preventDefault();
-        prop.setExpense((prevState) => [...prevState, formData]);
-        console.log(formData)
-        setFormData({ title: '', category: '', amount: '' });
-        // const data = getFormData(e.target);
-        // data.id=uuidv4();
-        // prop.setExpense((prevState)=>[...prevState,data])
+    const validateError = (expeseData) => {
+        const { title, category, amount } = expeseData;
+        const errorData = {};
+        if (!title) {
+            errorData.title = "* Title is required"
+        }
+        if (!category) {
+            errorData.category = "* Category is required"
+        }
+        if (!amount) {
+            errorData.amount = "* Amount is required"
+        }
+        setError(errorData);
     }
-    const handleInputChange = (e) => {
-        const { name, value } = e.target;
-        setFormData({id: uuidv4(), ...formData, [name]: value });
-    };
-    console.log(formData)
 
-    // function getFormData(form){
-    //    const formData = new FormData(form);
-    //    const data= {};
-    //    for (const [key,value] of formData.entries()){
-    //          data[key] =value;
-    //         }
-    //    return data;
-    // }
+
+    function submitHandler(e) {
+    e.preventDefault();
+
+    if (Object.keys(error).length !== 0) return;
+
+    const newExpense = [...expense, trimmedFormData];
+    localStorage.setItem('expense', JSON.stringify(newExpense));
+
+    setExpense(JSON.parse(localStorage.getItem('expense')));
+
+    setFormData({ title: '', category: '', amount: '' }); //reset
+}
+
+    const handleInputChange = (e) => {
+
+        const { name, value } = e.target;
+        setFormData({ ...formData, [name]: value });
+        setTrimmedFormData({
+            id:uuidv4(),
+            title:formData.title.trim(),
+            category:formData.category.trim(),
+            amount:parseInt(formData.amount),
+        });
+
+        validateError(trimmedFormData);
+
+    };
+
 
     return (
-        <div className='min-w-[300px] max-w-[500px] max-h-[500px] 
+        <div className='min-w-[300px] max-w-[600px] max-h-[500px] 
         flex flex-col items-center
-        mt-7 p-2'>
-            <form onSubmit={submitHandler} className="w-[70%] p-5
-                ">
-            <div >
-             <p>Title</p>
-             <input type="text" name="title" onChange={handleInputChange} value={formData.title} 
-             placeholder='Enter expense Title' required/>
-            </div>
-            <div>
-             <p>Category</p>
-             <input type="text" name="category" onChange={handleInputChange} value={formData.category} 
-             placeholder='Enter Category Title' required/>
-            </div>
-            <div>
-             <p>Amount</p>
-             <input type="number" name="amount" onChange={handleInputChange} value={formData.amount} 
-             placeholder='Enter Amount' required/>
-            </div>
-            <button type="submit" className="bg-purple-500 mt-4">ADD</button>
+        mt-7 mx-auto p-2'>
+            <form onSubmit={submitHandler} className="w-[100%] p-5">
+                <InputControl
+                    label={"Title"}
+                    name={"title"}
+                    type={"text"}
+                    onChange={handleInputChange}
+                    id={"title"}
+                    value={formData.title}
+                    placeholder={"Enter Your Expense name"}
+                    error={error.title} />
+
+                <InputControl
+                    label={"Category"}
+                    name={"category"}
+                    type={"text"}
+                    onChange={handleInputChange}
+                    id={"category"}
+                    value={formData.category}
+                    placeholder={"Enter Your Expense Category"}
+                    error={error.category} />
+
+                <InputControl
+                    label={"Amount"}
+                    name={"amount"}
+                    type={"number"}
+                    onChange={handleInputChange}
+                    id={"amount"}
+                    value={formData.amount}
+                    placeholder={"Enter Expense Amount"}
+                    error={error.amount} />
+
+                <button type="submit" className="bg-green-300 mt-4 p-2 w-[100px] rounded-lg font-bold text-green-800">ADD</button>
             </form>
-            
+
         </div>
 
     );
