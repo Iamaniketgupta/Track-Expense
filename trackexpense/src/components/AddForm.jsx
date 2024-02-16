@@ -1,55 +1,47 @@
-import { useState } from 'react';
+import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import InputControl from './InputControl';
 
-const AddForm = ({setExpense,expense}) => {
-
+const AddForm = ({ setExpense, expense }) => {
     const [formData, setFormData] = useState({ title: '', category: '', amount: '' });
-    const [trimmedFormData, setTrimmedFormData] = useState({  title: '', category: '', amount: '' });
     const [error, setError] = useState({});
 
-    const validateError = (expeseData) => {
-        const { title, category, amount } = expeseData;
+    const validateError = (expenseData) => {
+        const { title, category, amount } = expenseData;
         const errorData = {};
         if (!title) {
-            errorData.title = "* Title is required"
+            errorData.title = "* Title is required";
         }
         if (!category) {
-            errorData.category = "* Category is required"
+            errorData.category = "* Category is required";
         }
         if (!amount) {
-            errorData.amount = "* Amount is required"
+            errorData.amount = "* Amount is required";
         }
         setError(errorData);
-    }
+    };
 
+    const submitHandler = (e) => {
+        e.preventDefault();
+        validateError(formData); // Validate error before submitting
+        if (Object.keys(error).length !== 0) return;
+        
+        const newExpenseItem = { ...formData, id: uuidv4() };
+        setExpense([...expense, newExpenseItem]);
+        setFormData({ title: '', category: '', amount: '' }); // Reset form data
+    };
 
-    function submitHandler(e) {
-    e.preventDefault();
-
-    if (Object.keys(error).length !== 0) return;
-
-    const newExpense = [...expense, trimmedFormData];
-    localStorage.setItem('expense', JSON.stringify(newExpense));
-
-    setExpense(JSON.parse(localStorage.getItem('expense')));
-
-    setFormData({ title: '', category: '', amount: '' }); //reset
-}
+    //saving in local storage
+    useEffect(()=>{
+        localStorage.setItem('expense',JSON.stringify((expense)));
+    },[expense]);
 
     const handleInputChange = (e) => {
-
         const { name, value } = e.target;
-        setFormData({ ...formData, [name]: value });
-        setTrimmedFormData({
-            id:uuidv4(),
-            title:formData.title.trim(),
-            category:formData.category.trim(),
-            amount:parseInt(formData.amount),
-        });
-
-        validateError(trimmedFormData);
-
+        setFormData((prevFormData) => ({
+            ...prevFormData,
+            [name]: value
+        }));
     };
 
 
@@ -90,9 +82,7 @@ const AddForm = ({setExpense,expense}) => {
 
                 <button type="submit" className="bg-green-300 mt-4 p-2 w-[100px] rounded-lg font-bold text-green-800">ADD</button>
             </form>
-
         </div>
-
     );
 }
 
