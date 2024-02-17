@@ -1,10 +1,14 @@
 import { useEffect, useState } from "react";
 import ContextMenu from "./ContextMenu";
 
-const ExpenseTable = ({ expense, setExpense, totalAmount, setTotalAmount }) => {
+const ExpenseTable = ({ expense,
+    setExpense,
+    totalAmount,
+    setTotalAmount,
+    setFormData ,setGetID}) => {
 
     const [filterdata, setFilterData] = useState([])
-    const[contextPosition,setContextPosition] =useState({});
+    const [contextPosition, setContextPosition] = useState({});
 
 
     useEffect(() => {
@@ -28,18 +32,31 @@ const ExpenseTable = ({ expense, setExpense, totalAmount, setTotalAmount }) => {
     }, [filterdata]);
 
     // context handler
-    function contextHandler(e,ID) {
-        e.preventDefault();        
-        
-        const position = {X :e.clientX ,Y:e.clientY,ID:ID}
+    function contextHandler(e, ID) {
+        e.preventDefault();
+        setGetID(ID);
+        const position = { X: e.clientX, Y: e.clientY, ID: ID }
         setContextPosition(position);
     }
 
+    // sorting handler
+    function sortHandler(e) {
+        if (e.target.id === "ascending") {
+            setFilterData(filterdata.sort((a, b) => a.amount - b.amount));
+        }
+        if (e.target.id === "descending") {
+            setFilterData(filterdata.sort((a, b) => b.amount - a.amount));
+        }
+    }
+    
 
     return (
         <div className="flex overflow-x-hidden">
-        <ContextMenu contextPosition={contextPosition} setContextPosition={setContextPosition} expense={expense} setExpense={setExpense}/>
-            <table className="w-full p-3" onClick={()=>setContextPosition({})}>
+            <ContextMenu contextPosition={contextPosition}
+                setContextPosition={setContextPosition}
+                expense={expense} setExpense={setExpense}
+                setFormData={setFormData} />
+            <table className="w-full p-3" onClick={() => setContextPosition({})}>
                 <thead className="bg-gray-50">
                     <tr>
                         <th className="py-3 px-6 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
@@ -57,13 +74,15 @@ const ExpenseTable = ({ expense, setExpense, totalAmount, setTotalAmount }) => {
                             </select>
                         </th>
                         <th className="px-3 py-3 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            Amount
+                            Amount 
+                            <span className="text-2xl mx-1 font-extraboldbold cursor-pointer" id="descending" onClick={(e)=>sortHandler(e)}>&uarr;</span>
+                            <span className="text-2xl mx-1 font-extraboldbold cursor-pointer" id="ascending" onClick={(e)=>sortHandler(e)}>&darr;</span>
                         </th>
                     </tr>
                 </thead>
                 <tbody>
                     {filterdata.map((element) => (
-                        <tr key={element.id} className="bg-white cursor-pointer" onContextMenu={(e) => contextHandler(e,element.id)}>
+                        <tr key={element.id} className="bg-white cursor-pointer" onContextMenu={(e) => contextHandler(e, element.id)}>
                             <td className="text-center py-4 text-sm text-gray-900">{element.title}</td>
                             <td className="text-center py-4 text-sm text-gray-900">{element.category}</td>
                             <td className="text-center py-4 text-sm text-gray-900">{element.amount}</td>
