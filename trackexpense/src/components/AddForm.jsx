@@ -2,8 +2,8 @@ import { useEffect, useState } from 'react';
 import { v4 as uuidv4 } from 'uuid';
 import InputControl from './InputControl';
 
-const AddForm = ({ setExpense, expense }) => {
-    const [formData, setFormData] = useState({ title: '', category: '', amount: '' });
+const AddForm = ({setGetID, getID, setExpense, expense,formData,setFormData }) => {
+    
     const [error, setError] = useState({});
 
     const validateError = (expenseData) => {
@@ -25,7 +25,22 @@ const AddForm = ({ setExpense, expense }) => {
         e.preventDefault();
         validateError(formData); // Validate error before submitting
         if (Object.keys(error).length !== 0) return;
-        
+
+        // ensuring the edit content 
+        const index = expense.findIndex(obj => obj.id === getID);
+        if (index !== -1) {          
+                expense[index].title = formData.title;
+
+                expense[index].category = formData.category;
+            
+                expense[index].amount = formData.amount;
+            
+            setExpense([...expense]);
+            setGetID('');
+            setFormData({ title: '', category: '', amount: '' }); // Reset form data
+            return;
+        }
+
         const newExpenseItem = { ...formData, id: uuidv4() };
         setExpense([...expense, newExpenseItem]);
         setFormData({ title: '', category: '', amount: '' }); // Reset form data
